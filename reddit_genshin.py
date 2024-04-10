@@ -36,7 +36,7 @@ async def main():
     while True:
         try:
             post_record = json.load(open("./data/post_record.json", "r", encoding="utf-8"))
-            for _ in range(20):
+            for _ in range(200):
                 task = asyncio.create_task(download_post(subreddit, post_record, post_record_lock))
                 tasks.append(task)
             for task in tasks:
