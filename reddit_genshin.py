@@ -32,26 +32,25 @@ async def main():
     subreddit = await reddit.subreddit('Genshin_Impact') 
 
     tasks = []
+    post_record = json.load(open("./data/post_record.json", "r", encoding="utf-8"))
+    for _ in range(20):
+        task = asyncio.create_task(download_post(subreddit, post_record, post_record_lock))
+        tasks.append(task)
+    for task in tasks:
+        await task
+    #print(post_record)
+    with open("./data/post_record.json", "w", encoding="utf-8") as f:
+        json.dump(post_record, f)
+        f.close()
+    print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())+str(post_record)+"\n")
 
-    while True:
-        try:
-            post_record = json.load(open("./data/post_record.json", "r", encoding="utf-8"))
-            for _ in range(200):
-                task = asyncio.create_task(download_post(subreddit, post_record, post_record_lock))
-                tasks.append(task)
-            for task in tasks:
-                await task
-            #print(post_record)
-            with open("./data/post_record.json", "w", encoding="utf-8") as f:
-                json.dump(post_record, f)
-                f.close()
-            print(post_record)
-        except Exception as e:
-            print("Exception!! "+e.__str__())
-            time.sleep(120)
-            continue
 
 
 if __name__ == "__main__":
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
-    asyncio.run(main())
+    while True:
+        try:
+            asyncio.run(main())
+        except Exception as e:
+            print("Exception!! "+e.__str__()+" | let's sleep 10 minutes")
+            time.sleep(600)
